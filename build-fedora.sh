@@ -41,23 +41,27 @@ else
     exit 1
 fi
 
-# Preserve NVM path if running under sudo and NVM exists for the original user
-if [ "$IS_SUDO" = true ] && [ "$ORIGINAL_USER" != "root" ] && [ -d "$ORIGINAL_HOME/.nvm" ]; then
-    echo "Found NVM installation for user $ORIGINAL_USER, attempting to preserve npm/npx path..."
-    # Source NVM script to set up NVM environment variables temporarily
-    export NVM_DIR="$ORIGINAL_HOME/.nvm"
-    [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh" # This loads nvm
+# Setup Node.js/npm path - check if already available before using NVM
+if ! command -v npm &> /dev/null || ! command -v npx &> /dev/null; then
+    # Only setup NVM if npm/npx not already available
+    if [ "$IS_SUDO" = true ] && [ "$ORIGINAL_USER" != "root" ] && [ -d "$ORIGINAL_HOME/.nvm" ]; then
+        echo "npm/npx not found in PATH, checking NVM installation for user $ORIGINAL_USER..."
+        # Source NVM script to set up NVM environment variables temporarily
+        export NVM_DIR="$ORIGINAL_HOME/.nvm"
+        [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh" # This loads nvm
 
-    # Find the path to the currently active or default Node version's bin directory
-    # nvm_find_node_version might not be available, try finding the latest installed version
-    NODE_BIN_PATH=$(find "$NVM_DIR/versions/node" -maxdepth 2 -type d -name 'bin' | sort -V | tail -n 1)
+        # Find the path to the currently active or default Node version's bin directory
+        NODE_BIN_PATH=$(find "$NVM_DIR/versions/node" -maxdepth 2 -type d -name 'bin' | sort -V | tail -n 1)
 
-    if [ -n "$NODE_BIN_PATH" ] && [ -d "$NODE_BIN_PATH" ]; then
-        echo "Adding $NODE_BIN_PATH to PATH"
-        export PATH="$NODE_BIN_PATH:$PATH"
-    else
-        echo "Warning: Could not determine NVM Node bin path. npm/npx might not be found."
+        if [ -n "$NODE_BIN_PATH" ] && [ -d "$NODE_BIN_PATH" ]; then
+            echo "Adding $NODE_BIN_PATH to PATH"
+            export PATH="$NODE_BIN_PATH:$PATH"
+        else
+            echo "Warning: Could not determine NVM Node bin path. npm/npx might not be found."
+        fi
     fi
+else
+    echo "✓ npm/npx already available in PATH"
 fi
 
 # Print system information
