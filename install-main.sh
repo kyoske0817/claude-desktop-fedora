@@ -5,7 +5,7 @@ set -e
 # This script builds and installs Claude Desktop from the official Windows installer
 # Note: Users build from Anthropic's official installer - no redistribution of binaries
 
-SCRIPT_VERSION="1.0.7"
+SCRIPT_VERSION="1.0.9"
 REPO_URL="https://raw.githubusercontent.com/CaullenOmdahl/claude-desktop-fedora/main"
 INSTALL_MARKER="/usr/lib64/claude-desktop/.installed_version"
 
@@ -114,26 +114,8 @@ get_latest_claude_version() {
 }
 
 update_script() {
-    log_info "Checking for installer script updates..."
-    
-    # Get latest install script
-    if curl -s -o /tmp/install_new.sh "$REPO_URL/install.sh"; then
-        NEW_VERSION=$(grep '^SCRIPT_VERSION=' /tmp/install_new.sh | cut -d'"' -f2)
-        if [ "$NEW_VERSION" != "$SCRIPT_VERSION" ]; then
-            log_info "Installer script update available: $SCRIPT_VERSION → $NEW_VERSION"
-            read -p "Update installer script? (y/N): " -n 1 -r
-            echo
-            if [[ $REPLY =~ ^[Yy]$ ]]; then
-                cp /tmp/install_new.sh "$0"
-                chmod +x "$0"
-                log_success "Installer script updated. Restarting..."
-                exec "$0" "$@"
-            fi
-        else
-            log_success "Installer script is up to date"
-        fi
-    fi
-    rm -f /tmp/install_new.sh
+    # Skip update check - leap-pad architecture ensures we're always running latest
+    log_success "Running latest installer via leap-pad architecture"
 }
 
 download_build_script() {
