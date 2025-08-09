@@ -5,7 +5,7 @@ set -e
 # This script builds and installs Claude Desktop from the official Windows installer
 # Note: Users build from Anthropic's official installer - no redistribution of binaries
 
-SCRIPT_VERSION="1.0.6"
+SCRIPT_VERSION="1.0.7"
 REPO_URL="https://raw.githubusercontent.com/CaullenOmdahl/claude-desktop-fedora/main"
 INSTALL_MARKER="/usr/lib64/claude-desktop/.installed_version"
 
@@ -137,20 +137,26 @@ update_script() {
 }
 
 download_build_script() {
-    log_info "Downloading latest build script..."
+    log_info "Downloading latest build script and VERSION file..."
     
-    # Remove any cached build script to ensure fresh download
-    rm -f /tmp/build-fedora.sh
+    # Remove any cached files to ensure fresh download
+    rm -f /tmp/build-fedora.sh /tmp/VERSION
     
-    # Add cache-busting timestamp to URL
+    # Add cache-busting timestamp to URLs
     TIMESTAMP=$(date +%s)
     if ! curl -s -o /tmp/build-fedora.sh "$REPO_URL/build-fedora.sh?t=$TIMESTAMP"; then
         log_error "Failed to download build script"
         exit 1
     fi
     
+    # Download VERSION file to same location
+    if ! curl -s -o /tmp/VERSION "$REPO_URL/VERSION?t=$TIMESTAMP"; then
+        log_error "Failed to download VERSION file"
+        exit 1
+    fi
+    
     chmod +x /tmp/build-fedora.sh
-    log_success "Build script downloaded"
+    log_success "Build script and VERSION file downloaded"
 }
 
 build_and_install() {
