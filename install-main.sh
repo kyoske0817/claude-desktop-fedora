@@ -1,6 +1,28 @@
 #!/bin/bash
 set -e
 
+# Cleanup function to remove temporary files on exit
+cleanup() {
+    local exit_code=$?
+    if [ $exit_code -eq 0 ]; then
+        log_info "🧹 Cleaning up temporary files after successful installation..."
+    else
+        log_error "🧹 Cleaning up temporary files after failed installation..."
+    fi
+    
+    # Remove Claude-related temporary files
+    sudo rm -rf /tmp/build /tmp/build-fedora.sh /tmp/VERSION /tmp/Claude-* /tmp/install_new.sh /tmp/electron* 2>/dev/null || true
+    
+    if [ $exit_code -eq 0 ]; then
+        log_success "Cleanup completed"
+    else
+        log_info "Cleanup completed (installation failed with exit code $exit_code)"
+    fi
+}
+
+# Set up cleanup trap for both successful exit and failures
+trap cleanup EXIT
+
 # Claude Desktop for Linux - Universal Installer
 # This script builds and installs Claude Desktop from the official Windows installer
 # Note: Users build from Anthropic's official installer - no redistribution of binaries
@@ -179,10 +201,7 @@ build_and_install() {
         exit 1
     fi
     
-    # Cleanup
-    log_info "🧹 Cleaning up temporary files..."
-    rm -rf /tmp/build-fedora.sh /tmp/claude-desktop-* /tmp/build 2>/dev/null || true
-    log_success "Cleanup completed"
+    # Note: Cleanup is handled by EXIT trap
 }
 
 create_update_checker() {

@@ -1,6 +1,19 @@
 #!/bin/bash
 set -e
 
+# Cleanup function to remove build directories on exit
+cleanup_build() {
+    local exit_code=$?
+    if [ $exit_code -ne 0 ]; then
+        echo "🧹 Cleaning up build directories after failure..."
+        rm -rf "${WORK_DIR:-/tmp/build}" /tmp/Claude-* /tmp/electron.zip 2>/dev/null || true
+        echo "Build cleanup completed"
+    fi
+}
+
+# Set up cleanup trap for failures
+trap cleanup_build EXIT
+
 # Update this URL when a new version of Claude Desktop is released
 CLAUDE_DOWNLOAD_URL="https://storage.googleapis.com/osprey-downloads-c02f6a0d-347c-492b-a752-3e0651722e97/nest-win-x64/Claude-Setup-x64.exe"
 
