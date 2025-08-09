@@ -210,8 +210,11 @@ if [ -f "$SCRIPT_DIR/VERSION" ]; then
 elif [ -f "VERSION" ]; then
     VERSION=$(cat VERSION | tr -d '\n\r')
     echo "📋 Using package version: $VERSION"
+elif [ -f "/tmp/VERSION" ]; then
+    VERSION=$(cat /tmp/VERSION | tr -d '\n\r')
+    echo "📋 Using package version: $VERSION (from /tmp/VERSION)"
 else
-    echo "❌ VERSION file not found in $SCRIPT_DIR or current directory"
+    echo "❌ VERSION file not found in $SCRIPT_DIR, current directory, or /tmp/"
     exit 1
 fi
 
