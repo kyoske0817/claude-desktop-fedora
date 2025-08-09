@@ -137,6 +137,8 @@ if ! curl -L -o "$ELECTRON_ZIP" "$ELECTRON_URL"; then
 fi
 
 echo "📦 Extracting Electron..."
+# Clean any existing electron directory to prevent conflicts
+rm -rf "$ELECTRON_DIR"
 mkdir -p "$ELECTRON_DIR"
 if ! unzip -o -q "$ELECTRON_ZIP" -d "$ELECTRON_DIR"; then
     echo "❌ Failed to extract Electron"
