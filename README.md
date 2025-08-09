@@ -14,7 +14,7 @@ An intelligent installer that builds Claude Desktop for Fedora Linux directly fr
 ## 🚀 One-Line Installation
 
 ```bash
-curl -sSL https://raw.githubusercontent.com/CaullenOmdahl/claude-desktop-fedora/main/install.sh | sudo bash
+curl -sSL -H "Cache-Control: no-cache" "https://raw.githubusercontent.com/CaullenOmdahl/claude-desktop-fedora/main/install.sh?$(date +%s)" | sudo bash
 ```
 
 That's it! The installer will:
