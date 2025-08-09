@@ -56,7 +56,60 @@ This project uses independent semantic versioning (Major.Minor.Patch) in the `VE
 - **Minor**: New features, updated Claude Desktop versions
 - **Patch**: Bug fixes, documentation updates
 
-### Legal Compliance
+## Version Management & Git Workflow
+
+This project uses independent semantic versioning (Major.Minor.Patch) in the `VERSION` file.
+
+### Automatic Version Incrementing
+
+**IMPORTANT**: Before making any git commit, always increment the version in the `VERSION` file:
+
+1. **Read current version**: `cat VERSION`
+2. **Increment appropriately**:
+   - **Patch** (x.x.X+1): Bug fixes, small improvements, documentation updates
+   - **Minor** (x.X+1.0): New features, compatibility updates, significant changes
+   - **Major** (X+1.0.0): Breaking changes, major architecture updates
+3. **Update VERSION file**: `echo "X.Y.Z" > VERSION`
+4. **Commit changes**: Include version bump in commit
+
+### Version Increment Guidelines
+
+- **Patch increment** for:
+  - Bug fixes and error corrections
+  - Documentation updates
+  - Minor UX improvements
+  - Small code refactoring
+
+- **Minor increment** for:
+  - New features or functionality
+  - Updated Claude Desktop compatibility
+  - Enhanced native bindings
+  - Significant installer improvements
+
+- **Major increment** for:
+  - Breaking changes to build process
+  - Architecture redesigns
+  - Compatibility breaking updates
+
+### Git Commit Workflow
+
+```bash
+# 1. Check current version
+cat VERSION
+
+# 2. Increment version (example: 1.0.1 -> 1.0.2)
+echo "1.0.2" > VERSION
+
+# 3. Stage all changes including VERSION
+git add .
+
+# 4. Commit with descriptive message
+git commit -m "Fix installer UX and increment to v1.0.2"
+```
+
+**Always include the version number in commit messages for tracking.**
+
+### Compliance
 
 This project builds from Anthropic's official installer rather than redistributing binaries:
 
