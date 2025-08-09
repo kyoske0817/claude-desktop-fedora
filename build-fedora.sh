@@ -138,7 +138,7 @@ fi
 
 echo "📦 Extracting Electron..."
 mkdir -p "$ELECTRON_DIR"
-if ! unzip -q "$ELECTRON_ZIP" -d "$ELECTRON_DIR"; then
+if ! unzip -o -q "$ELECTRON_ZIP" -d "$ELECTRON_DIR"; then
     echo "❌ Failed to extract Electron"
     exit 1
 fi
