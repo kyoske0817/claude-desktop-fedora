@@ -3,7 +3,7 @@ set -e
 
 # Claude Desktop for Linux - Universal Installer
 # This script builds and installs Claude Desktop from the official Windows installer
-# Legal: Users build from Anthropic's official installer - no redistribution of binaries
+# Note: Users build from Anthropic's official installer - no redistribution of binaries
 
 SCRIPT_VERSION="1.0.0"
 REPO_URL="https://raw.githubusercontent.com/CaullenOmdahl/claude-desktop-fedora/main"

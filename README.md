@@ -7,7 +7,7 @@ This is an independent community project to bring Claude Desktop to Linux. For i
 
 # Claude Desktop for Linux
 
-**Status: ✅ Fully Working** | **Supports: Fedora 42+** | **Legal: ✅ Build from Official Installer**
+**Status: ✅ Fully Working** | **Supports: Fedora 42+** | **Source: Build from Official Installer**
 
 An intelligent installer that builds Claude Desktop for Fedora Linux directly from Anthropic's official Windows installer, providing seamless Linux integration with automatic updates.
 
@@ -24,7 +24,7 @@ That's it! The installer will:
 - ✅ Set up automatic update checking
 - ✅ Create convenient update commands
 
-**Legal Note:** This script builds from Anthropic's official installer - no pre-built binaries are redistributed.
+**Note:** This script builds from Anthropic's official installer - no pre-built binaries are redistributed.
 
 ## System Requirements
 
@@ -152,7 +152,7 @@ The installer works by:
 5. **Install**: Uses standard package management for clean installation
 6. **Integrate**: Sets up desktop integration and update checking
 
-**Legal Compliance**: No pre-built binaries are distributed. Users build directly from Anthropic's official installer.
+**Compliance**: No pre-built binaries are distributed. Users build directly from Anthropic's official installer.
 
 ## Environment Variables
 
@@ -207,7 +207,7 @@ The build scripts in this repository, are dual-licensed under the terms of the M
 
 See [LICENSE-MIT](LICENSE-MIT) and [LICENSE-APACHE](LICENSE-APACHE) for details.
 
-The Claude Desktop application, not included in this repository, is likely covered by [Anthropic's Consumer Terms](https://www.anthropic.com/legal/consumer-terms).
+The Claude Desktop application, not included in this repository, is covered by [Anthropic's Consumer Terms](https://www.anthropic.com/consumer-terms).
 
 ## Contribution
 
