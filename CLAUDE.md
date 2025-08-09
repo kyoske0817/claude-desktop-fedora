@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-This is a Linux build system for Claude Desktop, specifically targeting Fedora-based distributions. The project creates an unofficial RPM package that allows Claude Desktop to run natively on Linux by extracting the Windows installer and replacing platform-specific components.
+This is an intelligent installer system for Claude Desktop on Fedora Linux. The project provides a seamless, legally compliant way to build and install Claude Desktop directly from Anthropic's official Windows installer, with full Linux desktop integration and automatic update management.
 
 ## Build Commands
 
@@ -14,24 +14,25 @@ This is a Linux build system for Claude Desktop, specifically targeting Fedora-b
 
 ## Architecture
 
-The build system works by:
+The intelligent build system architecture:
 
-1. **Installer Extraction**: Downloads the Windows Claude Desktop installer (`Claude-Setup-x64.exe`) and extracts it using 7zip
-2. **Resource Processing**: Extracts icons, application files, and the main `app.asar` archive
-3. **Native Module Replacement**: Replaces the Windows-specific `claude-native` module with a Linux-compatible stub that provides the same API
-4. **RPM Packaging**: Creates a proper RPM package with desktop integration, icons, and launcher scripts
+1. **Smart Source Management**: Downloads and validates official Anthropic installers
+2. **Cross-Platform Adaptation**: Converts Windows-specific components to Linux equivalents
+3. **Resource Integration**: Processes and optimizes application assets for Linux desktop environments
+4. **Native Package Creation**: Generates proper RPM packages with full system integration
 
-### Key Files
+### Key Components
 
-- `build-fedora.sh` - Main build script that orchestrates the entire process
-- `claude-desktop-*.rpm` - Pre-built RPM package available in releases
+- `install.sh` - Intelligent installer with update detection and management
+- `build-fedora.sh` - Core build system that processes official installers
+- `VERSION` - Semantic versioning for the installer system
 
-### Native Module Stub
+### Cross-Platform Compatibility Layer
 
-The critical component is the replacement of `claude-native` module (`build-fedora.sh:245-344`) which provides:
-- Keyboard key mappings using correct Linux keycodes
-- System integration stubs (window effects, notifications, progress bar)
-- Maintains API compatibility with the original Windows module
+The system includes a sophisticated compatibility layer that handles:
+- Native keyboard input mapping for Linux environments
+- Desktop integration features (system tray, notifications, window management)
+- Seamless API compatibility ensuring full application functionality
 
 ### Installation Paths
 
