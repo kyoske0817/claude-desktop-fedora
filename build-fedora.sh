@@ -81,7 +81,7 @@ echo "Checking dependencies..."
 DEPS_TO_INSTALL=""
 
 # Check system package dependencies
-for cmd in sqlite3 7z wget wrestool icotool convert npx rpm rpmbuild; do
+for cmd in sqlite3 7z wget wrestool icotool convert npx rpm rpmbuild notify-send; do
     if ! check_command "$cmd"; then
         case "$cmd" in
             "sqlite3")
@@ -107,6 +107,9 @@ for cmd in sqlite3 7z wget wrestool icotool convert npx rpm rpmbuild; do
                 ;;
             "rpmbuild")
                 DEPS_TO_INSTALL="$DEPS_TO_INSTALL rpmbuild"
+                ;;
+            "notify-send")
+                DEPS_TO_INSTALL="$DEPS_TO_INSTALL libnotify"
                 ;;
             "curl")
                 DEPS_TO_INSTALL="$DEPS_TO_INSTALL curl"
