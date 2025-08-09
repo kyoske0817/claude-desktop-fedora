@@ -259,49 +259,10 @@ echo "Attempting to set frame:true and remove titleBarStyle/titleBarOverlay in i
 
 sed -i 's/height:e\.height,titleBarStyle:"default",titleBarOverlay:[^,]\+,/height:e.height,frame:true,/g' app.asar.contents/.vite/build/index.js || echo "Warning: sed command failed to modify index.js"
 
-# Replace native module with stub implementation
-echo "Creating stub native module..."
-cat > app.asar.contents/node_modules/claude-native/index.js << EOF
-// Stub implementation of claude-native using KeyboardKey enum values
-const KeyboardKey = {
-  Backspace: 43,
-  Tab: 280,
-  Enter: 261,
-  Shift: 272,
-  Control: 61,
-  Alt: 40,
-  CapsLock: 56,
-  Escape: 85,
-  Space: 276,
-  PageUp: 251,
-  PageDown: 250,
-  End: 83,
-  Home: 154,
-  LeftArrow: 175,
-  UpArrow: 282,
-  RightArrow: 262,
-  DownArrow: 81,
-  Delete: 79,
-  Meta: 187
-};
-
-Object.freeze(KeyboardKey);
-
-module.exports = {
-  getWindowsVersion: () => "10.0.0",
-  setWindowEffect: () => {},
-  removeWindowEffect: () => {},
-  getIsMaximized: () => false,
-  flashFrame: () => {},
-  clearFlashFrame: () => {},
-  showNotification: () => {},
-  setProgressBar: () => {},
-  clearProgressBar: () => {},
-  setOverlayIcon: () => {},
-  clearOverlayIcon: () => {},
-  KeyboardKey
-};
-EOF
+# Replace native module with enhanced Fedora 42 implementation
+echo "Creating enhanced native module for Fedora 42..."
+cp claude-native-improved.js app.asar.contents/node_modules/claude-native/index.js
+echo "✓ Enhanced native bindings installed"
 
 # Copy Tray icons
 mkdir -p app.asar.contents/resources
@@ -318,49 +279,11 @@ cd ..
 
 npx asar pack app.asar.contents app.asar || { echo "asar pack failed"; exit 1; }
 
-# Create native module with keyboard constants
+# Install enhanced native module in final location
+echo "Installing enhanced native bindings..."
 mkdir -p "$INSTALL_DIR/lib/$PACKAGE_NAME/app.asar.unpacked/node_modules/claude-native"
-cat > "$INSTALL_DIR/lib/$PACKAGE_NAME/app.asar.unpacked/node_modules/claude-native/index.js" << EOF
-// Stub implementation of claude-native using KeyboardKey enum values
-const KeyboardKey = {
-  Backspace: 43,
-  Tab: 280,
-  Enter: 261,
-  Shift: 272,
-  Control: 61,
-  Alt: 40,
-  CapsLock: 56,
-  Escape: 85,
-  Space: 276,
-  PageUp: 251,
-  PageDown: 250,
-  End: 83,
-  Home: 154,
-  LeftArrow: 175,
-  UpArrow: 282,
-  RightArrow: 262,
-  DownArrow: 81,
-  Delete: 79,
-  Meta: 187
-};
-
-Object.freeze(KeyboardKey);
-
-module.exports = {
-  getWindowsVersion: () => "10.0.0",
-  setWindowEffect: () => {},
-  removeWindowEffect: () => {},
-  getIsMaximized: () => false,
-  flashFrame: () => {},
-  clearFlashFrame: () => {},
-  showNotification: () => {},
-  setProgressBar: () => {},
-  clearProgressBar: () => {},
-  setOverlayIcon: () => {},
-  clearOverlayIcon: () => {},
-  KeyboardKey
-};
-EOF
+cp claude-native-improved.js "$INSTALL_DIR/lib/$PACKAGE_NAME/app.asar.unpacked/node_modules/claude-native/index.js"
+echo "✓ Enhanced native bindings installed in final location"
 
 # Copy app files
 cp app.asar "$INSTALL_DIR/lib/$PACKAGE_NAME/"
