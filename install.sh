@@ -32,6 +32,19 @@ log_error() {
     echo -e "${RED}❌${NC} $1"
 }
 
+# Estimated time tracker
+log_with_time() {
+    local level="$1"
+    local message="$2"
+    local timestamp=$(date '+%H:%M:%S')
+    case "$level" in
+        "info") echo -e "${BLUE}ℹ${NC} [$timestamp] $message" ;;
+        "success") echo -e "${GREEN}✓${NC} [$timestamp] $message" ;;
+        "warning") echo -e "${YELLOW}⚠${NC} [$timestamp] $message" ;;
+        "error") echo -e "${RED}❌${NC} [$timestamp] $message" ;;
+    esac
+}
+
 check_system() {
     if [ ! -f "/etc/fedora-release" ] && ! grep -qi "fedora" /etc/os-release 2>/dev/null; then
         log_error "This installer requires a Fedora-based Linux distribution"
@@ -61,19 +74,29 @@ get_latest_claude_version() {
     TEMP_DIR=$(mktemp -d)
     cd "$TEMP_DIR"
     
-    if ! curl -s -o Claude-Setup-x64.exe "https://storage.googleapis.com/osprey-downloads-c02f6a0d-347c-492b-a752-3e0651722e97/nest-win-x64/Claude-Setup-x64.exe"; then
+    log_info "📥 Downloading Claude installer to check version (120MB)..."
+    if ! curl --progress-bar -o Claude-Setup-x64.exe "https://storage.googleapis.com/osprey-downloads-c02f6a0d-347c-492b-a752-3e0651722e97/nest-win-x64/Claude-Setup-x64.exe"; then
         log_error "Failed to download Claude Desktop installer"
         rm -rf "$TEMP_DIR"
         exit 1
     fi
+    log_success "Download completed"
     
     # Install 7zip if needed
     if ! command -v 7z &> /dev/null; then
+        log_info "Installing p7zip for extraction..."
         dnf install -y p7zip-plugins >/dev/null 2>&1
+        log_success "p7zip installed"
     fi
     
     # Extract and get version
-    7z x -y Claude-Setup-x64.exe >/dev/null 2>&1
+    log_info "🔍 Extracting installer to detect version..."
+    if ! 7z x -y Claude-Setup-x64.exe >/dev/null 2>&1; then
+        log_error "Failed to extract installer"
+        rm -rf "$TEMP_DIR"
+        exit 1
+    fi
+    
     NUPKG_FILE=$(find . -name "AnthropicClaude-*-full.nupkg" | head -1)
     
     if [ -z "$NUPKG_FILE" ]; then
@@ -83,6 +106,9 @@ get_latest_claude_version() {
     fi
     
     VERSION=$(echo "$NUPKG_FILE" | grep -oP 'AnthropicClaude-\K[0-9]+\.[0-9]+\.[0-9]+(?=-full\.nupkg)')
+    log_success "Detected Claude Desktop version: $VERSION"
+    
+    # Cleanup
     rm -rf "$TEMP_DIR"
     echo "$VERSION"
 }
@@ -123,16 +149,22 @@ download_build_script() {
 }
 
 build_and_install() {
-    log_info "Building Claude Desktop from official installer..."
+    CLAUDE_VERSION="$1"  # Pass Claude version to avoid re-downloading
+    log_info "🔨 Building Claude Desktop from official installer..."
     
     # Run the build script
     cd /tmp
+    BUILD_START=$(date +%s)
+    log_with_time "info" "⚙️ Starting build process (estimated 2-5 minutes depending on system speed)..."
     if ! ./build-fedora.sh; then
         log_error "Build failed"
         exit 1
     fi
+    BUILD_ELAPSED=$(($(date +%s) - BUILD_START))
+    log_with_time "success" "Build completed successfully in ${BUILD_ELAPSED}s!"
     
     # Find the built RPM
+    log_info "📦 Locating built RPM package..."
     RPM_FILE=$(find . -name "claude-desktop-*.rpm" | head -1)
     if [ -z "$RPM_FILE" ]; then
         log_error "Built RPM not found"
@@ -140,23 +172,24 @@ build_and_install() {
     fi
     
     log_info "Installing Claude Desktop RPM..."
-    if dnf install -y "$RPM_FILE"; then
-        # Get the version we just installed
-        CLAUDE_VERSION=$(get_latest_claude_version)
+    if dnf install -y "$RPM_FILE" 2>/dev/null; then
+        # Get package version from build
         PACKAGE_VERSION=$(cat /tmp/VERSION 2>/dev/null || echo "1.0.0")
         
         # Mark installation
         echo "${PACKAGE_VERSION}-${CLAUDE_VERSION}" > "$INSTALL_MARKER"
         
         log_success "Claude Desktop installed successfully!"
-        log_success "Package version: $PACKAGE_VERSION (Claude $CLAUDE_VERSION)"
+        log_success "📦 Package version: $PACKAGE_VERSION (Claude $CLAUDE_VERSION)"
     else
         log_error "Installation failed"
         exit 1
     fi
     
     # Cleanup
+    log_info "🧹 Cleaning up temporary files..."
     rm -rf /tmp/build-fedora.sh /tmp/claude-desktop-* /tmp/build 2>/dev/null || true
+    log_success "Cleanup completed"
 }
 
 create_update_checker() {
@@ -236,8 +269,14 @@ main() {
     
     check_system
     
+    log_info "🔍 Checking current installation status..."
     INSTALLED_VERSION=$(get_installed_version)
+    
+    START_TIME=$(date +%s)
+    log_with_time "info" "🌐 Checking for latest Claude Desktop version (downloading 120MB installer)..."
     LATEST_CLAUDE=$(get_latest_claude_version)
+    ELAPSED=$(($(date +%s) - START_TIME))
+    log_with_time "success" "Version check completed in ${ELAPSED}s"
     
     if [ "$INSTALLED_VERSION" != "not_installed" ]; then
         log_info "Currently installed: $INSTALLED_VERSION"
@@ -257,7 +296,7 @@ main() {
     
     update_script
     download_build_script
-    build_and_install
+    build_and_install "$LATEST_CLAUDE"
     create_update_checker
     create_installer_alias
     
