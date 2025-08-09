@@ -194,11 +194,15 @@ if [ -z "$NUPKG_FILE" ]; then
 fi
 
 # Use independent versioning
-if [ -f "VERSION" ]; then
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+if [ -f "$SCRIPT_DIR/VERSION" ]; then
+    VERSION=$(cat "$SCRIPT_DIR/VERSION" | tr -d '\n\r')
+    echo "📋 Using package version: $VERSION"
+elif [ -f "VERSION" ]; then
     VERSION=$(cat VERSION | tr -d '\n\r')
     echo "📋 Using package version: $VERSION"
 else
-    echo "❌ VERSION file not found"
+    echo "❌ VERSION file not found in $SCRIPT_DIR or current directory"
     exit 1
 fi
 
@@ -261,8 +265,27 @@ sed -i 's/height:e\.height,titleBarStyle:"default",titleBarOverlay:[^,]\+,/heigh
 
 # Replace native module with enhanced Fedora 42 implementation
 echo "Creating enhanced native module for Fedora 42..."
-cp claude-native-improved.js app.asar.contents/node_modules/claude-native/index.js
-echo "✓ Enhanced native bindings installed"
+if [ -f "$SCRIPT_DIR/claude-native-improved.js" ]; then
+    cp "$SCRIPT_DIR/claude-native-improved.js" app.asar.contents/node_modules/claude-native/index.js
+    echo "✓ Enhanced native bindings installed"
+else
+    echo "⚠ Enhanced bindings not found, using fallback stub"
+    # Fallback to simple stub if enhanced version not available
+    cat > app.asar.contents/node_modules/claude-native/index.js << 'FALLBACK_EOF'
+const KeyboardKey = {
+  Backspace: 8, Tab: 9, Enter: 13, Shift: 16, Control: 17, Alt: 18,
+  CapsLock: 20, Escape: 27, Space: 32, PageUp: 33, PageDown: 34,
+  End: 35, Home: 36, LeftArrow: 37, UpArrow: 38, RightArrow: 39,
+  DownArrow: 40, Delete: 46, Meta: 91
+};
+module.exports = {
+  getWindowsVersion: () => "10.0.0", setWindowEffect: () => {}, removeWindowEffect: () => {},
+  getIsMaximized: () => false, flashFrame: () => {}, clearFlashFrame: () => {},
+  showNotification: () => {}, setProgressBar: () => {}, clearProgressBar: () => {},
+  setOverlayIcon: () => {}, clearOverlayIcon: () => {}, KeyboardKey
+};
+FALLBACK_EOF
+fi
 
 # Copy Tray icons
 mkdir -p app.asar.contents/resources
@@ -282,8 +305,26 @@ npx asar pack app.asar.contents app.asar || { echo "asar pack failed"; exit 1; }
 # Install enhanced native module in final location
 echo "Installing enhanced native bindings..."
 mkdir -p "$INSTALL_DIR/lib/$PACKAGE_NAME/app.asar.unpacked/node_modules/claude-native"
-cp claude-native-improved.js "$INSTALL_DIR/lib/$PACKAGE_NAME/app.asar.unpacked/node_modules/claude-native/index.js"
-echo "✓ Enhanced native bindings installed in final location"
+if [ -f "$SCRIPT_DIR/claude-native-improved.js" ]; then
+    cp "$SCRIPT_DIR/claude-native-improved.js" "$INSTALL_DIR/lib/$PACKAGE_NAME/app.asar.unpacked/node_modules/claude-native/index.js"
+    echo "✓ Enhanced native bindings installed in final location"
+else
+    echo "⚠ Enhanced bindings not found, creating fallback stub"
+    cat > "$INSTALL_DIR/lib/$PACKAGE_NAME/app.asar.unpacked/node_modules/claude-native/index.js" << 'FALLBACK_EOF'
+const KeyboardKey = {
+  Backspace: 8, Tab: 9, Enter: 13, Shift: 16, Control: 17, Alt: 18,
+  CapsLock: 20, Escape: 27, Space: 32, PageUp: 33, PageDown: 34,
+  End: 35, Home: 36, LeftArrow: 37, UpArrow: 38, RightArrow: 39,
+  DownArrow: 40, Delete: 46, Meta: 91
+};
+module.exports = {
+  getWindowsVersion: () => "10.0.0", setWindowEffect: () => {}, removeWindowEffect: () => {},
+  getIsMaximized: () => false, flashFrame: () => {}, clearFlashFrame: () => {},
+  showNotification: () => {}, setProgressBar: () => {}, clearProgressBar: () => {},
+  setOverlayIcon: () => {}, clearOverlayIcon: () => {}, KeyboardKey
+};
+FALLBACK_EOF
+fi
 
 # Copy app files
 cp app.asar "$INSTALL_DIR/lib/$PACKAGE_NAME/"
