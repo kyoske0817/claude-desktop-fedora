@@ -23,7 +23,12 @@ MAIN_INSTALLER_URL="${REPO_URL}/install-main.sh?t=${TIMESTAMP}"
 echo -e "${BLUE}ℹ${NC} Downloading and executing main installer from GitHub..."
 
 # Fetch and execute in one step to avoid any local caching
-if curl -fsSL "$MAIN_INSTALLER_URL" | bash; then
+# Use aggressive cache-busting headers to bypass GitHub CDN cache
+if curl -fsSL \
+    -H "Cache-Control: no-cache, no-store, must-revalidate" \
+    -H "Pragma: no-cache" \
+    -H "Expires: 0" \
+    "$MAIN_INSTALLER_URL" | bash; then
     echo -e "${GREEN}✓${NC} Installation completed successfully!"
 else
     echo -e "${RED}❌${NC} Installation failed"
