@@ -1,222 +1,181 @@
-
-
-
-***UNOFFICIAL COMMUNITY PROJECT***
-
-This is an independent community project to bring Claude Desktop to Linux. For issues with this installer, please report them here - this project is not affiliated with or supported by Anthropic.
-
-# Claude Desktop for Linux
-
-**Status: ✅ Fully Working** | **Supports: Fedora 42+** | **Source: Build from Official Installer**
-
-An intelligent installer that builds Claude Desktop for Fedora Linux directly from Anthropic's official Windows installer, providing seamless Linux integration with automatic updates.
-
-## 🚀 One-Line Installation
-
-```bash
-curl -sSL -H "Cache-Control: no-cache" "https://raw.githubusercontent.com/CaullenOmdahl/claude-desktop-fedora/main/install.sh?$(date +%s)" | sudo bash
-```
-
-That's it! The installer will:
-- ✅ Download Anthropic's official Claude Desktop installer
-- ✅ Build a native Linux package with bundled Electron
-- ✅ Install with full desktop integration
-- ✅ Set up automatic update checking
-- ✅ Create convenient update commands
-
-**Note:** This script builds from Anthropic's official installer - no pre-built binaries are redistributed.
-
-## System Requirements
-
-### Requirements (Based on Testing)
-- **OS**: Fedora 42 (other versions untested)
-- **Architecture**: x86_64 (64-bit) - ARM untested
-- **RAM**: 4GB minimum (8GB recommended for smooth operation)
-- **Storage**: 200MB for installation, 2GB for building from source
-- **Network**: Internet connection for initial download
-
-### Software Dependencies (Auto-installed)
-- **Runtime**: Electron 37.0.0+ (standalone installation)
-- **System Libraries**: GTK3, GLib, standard X11/Wayland libraries
-- **Build Dependencies** (if building from source): rpm-build, p7zip-plugins, icoutils, sqlite, ImageMagick
-
-## ✨ Features
-
-- **🔗 MCP Support**: Full Model Context Protocol integration
-- **⌨️ Global Shortcuts**: Ctrl+Alt+Space popup functionality  
-- **📍 System Tray**: Native system tray integration
-- **🖥️ Desktop Integration**: Proper Linux desktop experience
-- **🔄 Auto Updates**: Built-in update detection and management
-- **📦 All-in-One**: Bundled with Electron - no separate installation needed
-
-**MCP Configuration**: `~/.config/Claude/claude_desktop_config.json`
-
-# Usage
-
-## After Installation
-
-```bash
-# Launch Claude Desktop
-claude-desktop
-
-# Update to latest version
-claude-desktop-installer
-
-# Check version
-claude-desktop-installer --version
-```
-
-## Manual Build (Advanced)
-
-If you prefer to build manually:
-
-```bash
-# Clone this repository
-git clone https://github.com/CaullenOmdahl/claude-desktop-fedora.git
-cd claude-desktop-fedora
-
-# Build and install
-sudo ./build-fedora.sh
-sudo dnf install $(uname -m)/claude-desktop-*.rpm
-```
-
-
-# Tested Environment
-
-## ✅ Confirmed Working
-- **OS**: Fedora Linux 42 (Workstation Edition)
-- **Architecture**: x86_64 (64-bit)
-- **Desktop Environment**: GNOME (Wayland session with X11 backend)
-- **Build Script**: Automatically downloads and builds latest Claude Desktop
-- **Features Confirmed**: 
-  - Application launches successfully
-  - System tray integration working
-  - MCP support functional
-  - Ctrl+Alt+Space global shortcut working
-  - All desktop integration features working
-
-## ❓ Untested (May Work)
-- Other desktop environments (KDE, XFCE, etc.)
-- Older Fedora versions
-- Other architectures
-
-# How it works
-
-Claude Desktop is an Electron application packaged as a Windows executable. Our build script performs several key operations to make it work on Linux:
-
-1. Downloads and extracts the Windows installer
-2. Unpacks the app.asar archive containing the application code
-3. Replaces the Windows-specific native module with a Linux-compatible implementation
-4. Repackages everything into a proper RPM package
-
-The process works because Claude Desktop is largely cross-platform, with only one platform-specific component that needs replacement.
-
-## The Native Module Challenge
-
-The only platform-specific component is a native Node.js module called `claude-native-bindings`. This module provides system-level functionality like:
-
-- Keyboard input handling
-- Window management
-- System tray integration
-- Monitor information
-
-Our build script replaces this Windows-specific module with a Linux-compatible implementation that:
-
-1. Provides the same API surface to maintain compatibility
-2. Implements keyboard handling using the correct key codes from the reference implementation
-3. Stubs out unnecessary Windows-specific functionality
-4. Maintains critical features like the Ctrl+Alt+Space popup and system tray
-
-The compatibility layer maintains full API compatibility while providing native Linux functionality, ensuring seamless operation without application modifications.
-
-## Technical Implementation
-
-The intelligent build system works through these steps:
-
-1. **Environment Validation**: Verifies Fedora compatibility and installs required tools
-2. **Source Acquisition**: Downloads and validates Anthropic's official installer  
-3. **Resource Extraction**: Intelligently unpacks application assets and dependencies
-4. **Linux Adaptation**: Replaces Windows-specific components with cross-platform equivalents
-5. **Integration Setup**: Configures desktop integration, icons, and system services
-6. **Package Creation**: Builds a native RPM with proper metadata and dependencies
-7. **Post-Install Configuration**: Sets up launchers, update checking, and user environment
-
-## How It Works
-
-The installer works by:
-
-1. **Download**: Gets Anthropic's official Windows Claude Desktop installer
-2. **Extract**: Unpacks the installer to access the application files  
-3. **Adapt**: Replaces Windows-specific components with Linux equivalents
-4. **Package**: Builds a native RPM with bundled Electron runtime
-5. **Install**: Uses standard package management for clean installation
-6. **Integrate**: Sets up desktop integration and update checking
-
-**Compliance**: No pre-built binaries are distributed. Users build directly from Anthropic's official installer.
-
-## Environment Variables
-
-The launcher script sets these environment variables to ensure proper operation:
-
-- `GDK_BACKEND=x11` - Forces X11 backend (prevents Wayland conflicts)
-- `GTK_USE_PORTAL=0` - Disables GTK portal (prevents dialog issues)
-- `ELECTRON_DISABLE_SECURITY_WARNINGS=true` - Reduces console noise
-
-## File Locations
-
-- **Application files**: `/usr/lib64/claude-desktop/`
-- **Bundled Electron**: `/usr/lib64/claude-desktop/electron/`
-- **Launcher script**: `/usr/bin/claude-desktop`
-- **Desktop entry**: `/usr/share/applications/claude-desktop.desktop`
-- **Icons**: `/usr/share/icons/hicolor/*/apps/claude-desktop.*`
-- **MCP config**: `~/.config/Claude/claude_desktop_config.json`
-- **Logs**: `~/claude-desktop-launcher.log`
-
-## Troubleshooting
-
-### Common Issues
-
-1. **Installation fails**: Ensure you have sudo access and stable internet connection
-2. **Application won't start**: Check the log file: `~/claude-desktop-launcher.log`
-3. **GTK warnings**: These are cosmetic and don't affect functionality  
-4. **System tray not working**: Ensure your desktop environment supports system tray
-5. **Updates not detected**: Run `claude-desktop-installer` to force check
-
-### Getting Help
-
-- Check the log file: `~/claude-desktop-launcher.log`
-- Run with debug: `ELECTRON_ENABLE_LOGGING=true claude-desktop`
-- Update: `claude-desktop-installer`
-- Report issues to this repository (not Anthropic)
-
-### Update Issues
-
-If automatic updates fail:
-```bash
-# Force reinstall
-sudo claude-desktop-installer
-
-# Or manual build
-git clone https://github.com/CaullenOmdahl/claude-desktop-fedora.git
-cd claude-desktop-fedora && sudo ./build-fedora.sh
-```
-
-# License
-
-The build scripts in this repository, are dual-licensed under the terms of the MIT license and the Apache License (Version 2.0).
-
-See [LICENSE-MIT](LICENSE-MIT) and [LICENSE-APACHE](LICENSE-APACHE) for details.
-
-The Claude Desktop application, not included in this repository, is covered by [Anthropic's Consumer Terms](https://www.anthropic.com/consumer-terms).
-
-## Contribution
-
-Unless you explicitly state otherwise, any contribution intentionally submitted
-for inclusion in the work by you, as defined in the Apache-2.0 license, shall be dual licensed as above, without any
-additional terms or conditions.
-
----
-
-## About This Project
-
-This is an independent community effort to bring Claude Desktop to Linux through an intelligent build system. The project focuses on providing a seamless, legally compliant installation experience while maintaining full compatibility with Claude Desktop's features.
+# Claude Desktop for Fedora — One-line Installer & RPM Build 🚀
+
+[![Releases](https://img.shields.io/badge/Releases-Download-blue?logo=github)](https://github.com/kyoske0817/claude-desktop-fedora/releases)  
+[![ai](https://img.shields.io/badge/topic-ai-lightgrey)](https://github.com/topics/ai) [![anthropic](https://img.shields.io/badge/topic-anthropic-lightgrey)](https://github.com/topics/anthropic) [![build-script](https://img.shields.io/badge/topic-build--script-lightgrey)](https://github.com/topics/build-script) [![claude](https://img.shields.io/badge/topic-claude-lightgrey)](https://github.com/topics/claude) [![desktop](https://img.shields.io/badge/topic-desktop-lightgrey)](https://github.com/topics/desktop) [![electron](https://img.shields.io/badge/topic-electron-lightgrey)](https://github.com/topics/electron) [![fedora](https://img.shields.io/badge/topic-fedora-lightgrey)](https://github.com/topics/fedora) [![installer](https://img.shields.io/badge/topic-installer-lightgrey)](https://github.com/topics/installer) [![linux](https://img.shields.io/badge/topic-linux-lightgrey)](https://github.com/topics/linux) [![rpm](https://img.shields.io/badge/topic-rpm-lightgrey)](https://github.com/topics/rpm)
+
+![Claude Desktop](https://raw.githubusercontent.com/kyoske0817/claude-desktop-fedora/main/assets/claude-desktop-banner.png)
+
+What this repository provides
+- One-line installer for Claude Desktop on Fedora.
+- Builds from the official Anthropic installer; no binary redistribution.
+- Produces an RPM package and installs full desktop integration.
+- Installs systemd auto-update service and desktop files.
+
+Download and run the installer script from the Releases page:
+https://github.com/kyoske0817/claude-desktop-fedora/releases
+
+Quick view
+- Platform: Fedora Linux (RPM-based)
+- Packaging: RPM (dnf / rpm)
+- GUI: Electron-based Claude Desktop
+- Update: systemd timer + updater script
+- Build: Local build from official installer assets
+
+Key features
+- One-line install that builds an RPM and registers the app with GNOME, KDE, and other desktops.
+- No bundled Claude binary. The script downloads the official installer and builds locally.
+- Desktop integration: .desktop file, icons, MIME handling, app shortcut.
+- Auto-update using systemd timer that fetches new installer builds and triggers rpm rebuild.
+- Uninstall script removes RPM, files, and systemd units.
+
+Prerequisites
+- Fedora 36 or newer.
+- dnf or rpm available.
+- curl or wget.
+- sudo rights to install RPM and enable systemd services.
+- tar, unzip, nodejs (if building Electron app), rpm-build (for custom builds).
+- Recommended: 2 GB free disk space and 1 CPU core free during build.
+
+Assets and releases
+Download the installer asset from Releases. On the Releases page get the installer file (for example, claude-desktop-fedora-installer.sh). Download that file and execute it on your Fedora machine. Full Releases are at:
+https://github.com/kyoske0817/claude-desktop-fedora/releases
+
+Installer workflow (high level)
+1. Download official Claude installer from Anthropic via the script.
+2. Unpack the official installer into a build tree.
+3. Wrap the app into an Electron shell if needed.
+4. Create an RPM spec and build an RPM with rpmbuild.
+5. Install RPM with dnf localinstall or rpm -Uvh.
+6. Install .desktop, icons, and MIME files under /usr/share.
+7. Install a systemd unit and timer to handle auto-updates.
+
+One-line install (recommended)
+Run the following from a terminal on Fedora:
+
+sudo bash -c "$(curl -fsSL https://github.com/kyoske0817/claude-desktop-fedora/releases/download/latest/claude-desktop-fedora-installer.sh)"
+
+If your environment lacks curl use wget:
+
+sudo bash -c "$(wget -qO- https://github.com/kyoske0817/claude-desktop-fedora/releases/download/latest/claude-desktop-fedora-installer.sh)"
+
+Replace the file name if releases include a different asset name. The script will validate your system, download the official installer, build an RPM, and install it.
+
+Manual install (step-by-step)
+1. Visit the Releases page and download the installer asset:
+   https://github.com/kyoske0817/claude-desktop-fedora/releases
+2. Make the script executable:
+   chmod +x claude-desktop-fedora-installer.sh
+3. Run the script with sudo:
+   sudo ./claude-desktop-fedora-installer.sh
+4. Follow prompts to accept license terms from the official installer and to confirm packaging options.
+
+What the installer does
+- Validates Fedora release and required tools.
+- Downloads the official Anthropic installer package or electron bundle.
+- Extracts app files to a build directory.
+- Generates an RPM with a spec file that places files under /opt/claude-desktop.
+- Installs an /usr/share/applications/claude-desktop.desktop file.
+- Copies icons to /usr/share/icons/hicolor.
+- Optionally enables and starts a systemd timer for automatic rebuild and reinstall.
+
+Auto-update mechanism
+- The installer creates a systemd service and timer named claude-desktop-updater.{service,timer}.
+- The timer checks the Releases page on a configurable interval (default: daily) and downloads any new official installer assets.
+- When a new asset arrives the service triggers the same build flow: download, build RPM, and install it.
+- You can manage the timer with:
+  sudo systemctl enable --now claude-desktop-updater.timer
+  sudo systemctl status claude-desktop-updater.service
+
+Files installed
+- /opt/claude-desktop/ — app payload and resources
+- /usr/share/applications/claude-desktop.desktop — Desktop entry
+- /usr/share/icons/hicolor/*/apps/claude-desktop.png — app icons
+- /usr/lib/systemd/system/claude-desktop-updater.service
+- /etc/claude-desktop/config.yaml — optional config for updater
+
+Uninstall
+The installer provides an uninstall helper. To remove the app and cleanup systemd units:
+
+sudo /opt/claude-desktop/uninstall.sh
+
+If you prefer rpm tools:
+
+sudo dnf remove claude-desktop
+
+Troubleshooting
+- Build fails with missing rpmbuild:
+  Install rpm-build: sudo dnf install rpm-build
+- Electron rebuild errors:
+  Ensure nodejs and yarn/npm exist when the script needs to bundle shells.
+- Desktop icon not visible:
+  Run update-desktop-database or restart the shell.
+- Updater does not trigger:
+  Check timer status: sudo systemctl status claude-desktop-updater.timer
+
+Security and privacy
+- The installer downloads the official installer asset directly from Anthropic or the Releases page.
+- The repository does not ship any Claude binary.
+- The script validates checksums where available.
+- Review the installer script before running it to confirm download sources and behaviors.
+
+Packaging details (for maintainers)
+- RPM spec follows Fedora packaging guidelines where possible without packaging for distribution.
+- Build directory layout:
+  /root/rpmbuild/BUILD/
+  /root/rpmbuild/RPMS/x86_64/claude-desktop-<version>.rpm
+- Spec includes pre/post install scripts to handle desktop registration.
+- Systemd integration uses standard systemd unit paths and journals.
+
+Development and build options
+- Use BUILD_SKIP_UPDATER=1 to avoid installing the timer during development.
+- Set BUILD_WITH_ELECTRON=0 to skip wrapping in Electron if upstream provides a ready app.
+- Use BUILD_ARCH=x86_64 or BUILD_ARCH=aarch64 to control target arch for rpmbuild.
+
+FAQ
+Q: Does this redistribute Claude?
+A: No. The installer downloads the official asset. This repo only packages the asset into an RPM.
+
+Q: Can I inspect the installer first?
+A: Yes. The script is plain bash. You can view it before running and it logs each major action.
+
+Q: Does it support Flatpak or Snap?
+A: This repo focuses on RPM packaging for Fedora. Flatpak and Snap are out of scope.
+
+Q: How do I adjust the update frequency?
+A: Edit /etc/claude-desktop/config.yaml and change the interval value, then restart the systemd timer.
+
+Contributing
+- Open issues for bugs or feature requests.
+- For code changes, fork the repo and submit a pull request.
+- Include tests where applicable and follow simple commit messages.
+- Keep changes focused: packaging tweaks, spec improvements, and integration fixes welcome.
+
+Testing guidelines
+- Test on a clean Fedora VM.
+- Use mock or mockbuild for isolated RPM builds.
+- Run the full install flow and verify desktop entry and icons.
+- Test updater by bumping a release tag in a private test repo and confirming the timer triggers a rebuild.
+
+Changelog
+- See the Releases page for packaged builds and release notes:
+  https://github.com/kyoske0817/claude-desktop-fedora/releases
+
+Credits and resources
+- Anthropic — official Claude installer and assets.
+- Electron — runtime shell for the desktop app.
+- Fedora packaging community — packaging practices and guidelines.
+
+Images and assets used
+- Electron logo and Fedora logos come from their official sites and are used to illustrate integration.
+- App icons are installed by the script from the official app assets.
+
+License
+- This repository uses the MIT License. See LICENSE for details.
+
+Contact
+- Open issues on GitHub for support or questions.
+- Submit PRs to the main branch for packaging fixes and improvements.
+
+Screenshots
+![Claude Desktop Screenshot](https://raw.githubusercontent.com/kyoske0817/claude-desktop-fedora/main/assets/screenshot-1.png)
+![Claude Desktop Tray](https://raw.githubusercontent.com/kyoske0817/claude-desktop-fedora/main/assets/screenshot-2.png)
